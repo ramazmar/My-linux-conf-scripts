@@ -5,7 +5,7 @@ For each user
 * Configure bash
 * Configure zsh
 * ..
-
+### Another actions
 * Copy public ssh keys
 * Install several scripts
 * Append hotss to /etc/hosts
