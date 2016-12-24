@@ -1,2 +1,0 @@
-Al final cambiar 
-   cp /Users/armando/.bashrc  /Users/armando/.bash_profile
