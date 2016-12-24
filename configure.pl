@@ -30,6 +30,7 @@ use warnings;
 my $SCRIPT_DIR          = dirname( abs_path($0) );
 my $HOMECONF_FILES_DIR  = "$SCRIPT_DIR/home-conf-files/";
 my $CONF_FILES_DIR      = "$SCRIPT_DIR/conf-files/";
+my $MAC_CONF_FILES_DIR  = "$SCRIPT_DIR/mac-conf-files/";
 my $SCRIPTS_DIR         = "$SCRIPT_DIR/local-scripts/";
 
 sub get_valid_users_from_input
@@ -62,8 +63,13 @@ sub is_valid_user
 sub get_home_user_dir
 {
     my ($username) = @_;
-    return "/root/" if ($username eq "root");
-    return "/home/$username/";
+    if (is_macos() ){
+        return "/var/root/" if ($username eq "root");
+        return "/Users/$username/";
+    }else{
+        return "/root/" if ($username eq "root");
+        return "/home/$username/";
+    }
 }
 
 sub change_user_file_permission
@@ -80,6 +86,11 @@ sub copy_file_and_change_perm
     if ($user ne "root"){
         change_user_file_permission($user,get_home_user_dir($user)."/.bashrc") || die ("Couldn change file permission");
     }
+}
+
+sub is_macos 
+{
+    return 1 if (-d "/Users/");
 }
 
 sub get_file_contents
@@ -121,7 +132,11 @@ sub copy_all_home_conf_files
     closedir $dir;
 
     foreach (get_dir_files($conf_dir) ){
-        copy_file_and_change_perm($user,$_,get_home_user_dir($user));
+        if ($_ =~ /bashrc$/ and is_macos() ){
+            copy_file_and_change_perm($user,$_,get_home_user_dir($user)."/.bash_profile");
+        }else{
+            copy_file_and_change_perm($user,$_,get_home_user_dir($user));
+        }
     }
 }
 
@@ -189,10 +204,11 @@ die("Root privileges needed for this script") if (`whoami` !~ /root/);
 foreach my $user (get_valid_users_from_input()){
     print "\nConfiguring $user\n";
     copy_all_home_conf_files($user,$HOMECONF_FILES_DIR);
-
+    append_file_to_file("$MAC_CONF_FILES_DIR/vim-home-end.txt",get_home_user_dir($user)."/.vimrc") if (is_macos() );
     prompt_install_ssh_keys($user,"$CONF_FILES_DIR/sshkeys");
 }
 
 install_all_scripts($SCRIPTS_DIR);
 
 prompt_add_raw_hosts($CONF_FILES_DIR);
+
