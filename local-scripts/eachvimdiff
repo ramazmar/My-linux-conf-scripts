@@ -18,9 +18,7 @@ sub evimd
         next if ($file eq "." || $file eq "..");
         if (-f "$DIR2/$file"){
             if ( system("diff","-q","$DIR1/$file",$DIR2) != 0){
-                if ($type == 2){
-                    system("vimdiff","$DIR1/$file","$DIR2/$file");
-                }
+                system("vimdiff","$DIR1/$file","$DIR2/$file") if ($type == 2);
             }
         }   
     }
