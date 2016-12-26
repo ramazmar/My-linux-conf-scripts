@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+
+my $DIR1 = @ARGV[0];
+my $DIR2 = @ARGV[1];
+
+sub usage
+{
+    print "$0 <dir1> <dir2>\n";
+    exit;
+}
+
+sub evimd
+{
+    my ($type) = @_;
+
+    opendir DIRHANDLE, $DIR1 or die "$!"; 
+    foreach $file (readdir DIRHANDLE) {  
+        next if ($file eq "." || $file eq "..");
+        if (-f "$DIR2/$file"){
+            if ( system("diff","-q","$DIR1/$file",$DIR2) != 0){
+                if ($type == 2){
+                    system("vimdiff","$DIR1/$file","$DIR2/$file");
+                }
+            }
+        }   
+    }
+    closedir DIRHANDLE;
+}
+
+sub mustcontinue
+{
+    print "Continue to vimdiff? (Y/N)\n";
+    while(<STDIN>){
+        chomp( $_);
+        return 1 if ($_ =~ /^Y$/i);
+        return 0 if ($_ =~ /^N$/i);
+    }
+}
+
+#####################################################
+
+usage() if ( !-d $DIR1 || ! -d $DIR2 );
+evimd(1);
+evimd(2) if mustcontinue();
