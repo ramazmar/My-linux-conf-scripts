@@ -1,0 +1,11 @@
+#!/bin/bash
+
+[ -f /usr/bin/wakeonlan ] ||  { echo "wakeonlan needed" ; exit 0; }
+
+if [ "$1" == "salon" ]; then
+    sudo wakeonlan 44:37:e6:de:31:bf
+elif [ "$1" == "estudio" ]; then 
+    sudo wakeonlan 94:de:80:61:75:2a
+else
+    echo "Usage: ./despierta  [salon|estudio]"
+fi
